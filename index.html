@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>✨ Custom RO Plant Builder</title>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+  <!-- html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      padding: 30px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+    h2 {
+      font-weight: 500;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    label, select {
+      display: block;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      background: #fafafa;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    thead th {
+      background: #2c3e50;
+      color: #fff;
+      padding: 12px;
+      text-align: left;
+    }
+    tbody tr:nth-child(odd) { background: #f9fbfc; }
+    tbody tr:hover { background: #e1f0ff; }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      font-size: 0.95rem;
+    }
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #27ae60;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #fff;
+      background-color: #27ae60;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .btn:hover { background-color: #219150; }
+    .btn-group {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .hidden { display: none; }
+    .confirmation {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #27ae60;
+      padding: 16px;
+      margin-top: 20px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>🛠️ Custom RO Plant Builder</h2>
+
+    <label for="roSelect">Select RO Plant Capacity:</label>
+    <select id="roSelect">
+      <option value="">-- Select --</option>
+      <option value="1500">RO 1500 GPD</option>
+      <option value="1500">RO 3000 GPD</option>
+      <option value="1500">RO 4500 GPD</option>
+      <option value="1500">RO 6000 GPD</option>
+      <!-- You can add more capacities here -->
+    </select>
+
+    <form id="partForm" class="hidden">
+      <h3>Customize Your RO 1500 Components</h3>
+      <table id="partsTable">
+        <thead>
+          <tr>
+            <th>Select</th>
+            <th>Component</th>
+            <th>Specification</th>
+          </tr>
+        </thead>
+        <tbody id="partsBody"></tbody>
+      </table>
+
+      <!-- Buttons -->
+      <div class="btn-group">
+        <button type="button" class="btn" onclick="submitForm()">✅ Submit Selection</button>
+        <button type="button" class="btn" onclick="exportPDF()">📄 Export as PDF</button>
+      </div>
+    </form>
+
+    <!-- Confirmation Box -->
+    <div id="confirmationBox" class="confirmation hidden"></div>
+  </div>
+
+  <script>
+    const roData = {
+      "1500": [
+        { name: "Booster pump", spec: "0.75 HP" },
+        { name: "High-pressure pump", spec: "1.5 HP" },
+        { name: "Filter Housing", spec: "20'' Slim 3 Set" },
+        { name: "FRP Multimedia Vessels", spec: "8x35 2 set" },
+        { name: "FRP Membrane Housing", spec: "4040 1" },
+        { name: "Membrane", spec: "4040 1" },
+        { name: "Water quality indicators", spec: "TSD/EC/TEMP" },
+        { name: "Flow Meters", spec: "Product / Raw Water" },
+        { name: "Pressure Gauges", spec: "Feed / High / Rejection" },
+        { name: "Water level indicators", spec: "Product / Raw water" },
+        { name: "Low Pressure Switch", spec: "Differential Pressure Switches" },
+        { name: "Auto Flush System", spec: "Digital delay system" },
+        { name: "RO Frame/Skid", spec: "Stainless Steel 201" },
+        { name: "Electrical Controls", spec: "Online Water Quality Monitoring System" },
+        { name: "CIP System", spec: "Built-in" },
+        { name: "Dimensions", spec: "L-48'' W-28'' H-60''" },
+        { name: "UV Sterilization", spec: "5GPM" },
+        { name: "Mineralization", spec: "Calcium Chloride / Magnesium Sulphate" },
+        { name: "Antiscalant Chemical", spec: "***Antiscalant Chemical" },
+        { name: "Storage Tank", spec: "1000 Liters" },
+        { name: "Feed Water Temp", spec: "20–45°C" },
+        { name: "TDS", spec: "<1000" },
+        { name: "SDI", spec: "<3" },
+        { name: "Turbidity", spec: "<1 NTU" },
+        { name: "Iron", spec: "<0.1 PPM" },
+        { name: "pH Range", spec: "3–11" },
+        { name: "Oxidizer", spec: "<0 ppm" },
+        { name: "Hardness", spec: "<5 PPM" }
+      ]
+    };
+
+    const roSelect = document.getElementById('roSelect');
+    const partsForm = document.getElementById('partForm');
+    const partsBody = document.getElementById('partsBody');
+    const confirmationBox = document.getElementById('confirmationBox');
+
+    roSelect.addEventListener('change', () => {
+      const selected = roSelect.value;
+      if (!roData[selected]) {
+        partsForm.classList.add('hidden');
+        return;
+      }
+      partsForm.classList.remove('hidden');
+      confirmationBox.classList.add('hidden');
+      partsBody.innerHTML = '';
+
+      roData[selected].forEach(part => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><input type="checkbox" name="part" value="${part.name}:::${part.spec}"></td>
+          <td>${part.name}</td>
+          <td>${part.spec}</td>
+        `;
+        partsBody.appendChild(row);
+      });
+    });
+
+    function exportPDF() {
+      const selected = getSelectedParts();
+      if (selected.length === 0) {
+        alert("Please select at least one component.");
+        return;
+      }
+
+      const container = document.createElement('div');
+      const title = document.createElement('h3');
+      title.textContent = `RO ${roSelect.value} Custom Components`;
+      title.style.textAlign = 'center';
+      title.style.marginBottom = '20px';
+      container.appendChild(title);
+
+      const tbl = document.createElement('table');
+      tbl.style.width = '100%';
+      tbl.style.borderCollapse = 'collapse';
+      tbl.innerHTML = `
+        <thead>
+          <tr>
+            <th style="border:1px solid #333; padding:8px;">Component</th>
+            <th style="border:1px solid #333; padding:8px;">Specification</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${selected.map(cb => {
+            const [name, spec] = cb.value.split(':::');
+            return `
+              <tr>
+                <td style="border:1px solid #333; padding:8px;">${name}</td>
+                <td style="border:1px solid #333; padding:8px;">${spec}</td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+      `;
+      container.appendChild(tbl);
+
+      html2pdf().from(container).save(`RO_${roSelect.value}_Custom.pdf`);
+    }
+
+    function submitForm() {
+      const selected = getSelectedParts();
+      if (selected.length === 0) {
+        alert("Please select at least one component to submit.");
+        return;
+      }
+
+      const list = selected.map(cb => {
+        const [name, spec] = cb.value.split(':::');
+        return `<li><strong>${name}</strong>: ${spec}</li>`;
+      }).join('');
+
+      confirmationBox.innerHTML = `
+        <strong>✅ Submitted Successfully!</strong>
+        <ul style="margin-top:10px; list-style: inside;">${list}</ul>
+      `;
+      confirmationBox.classList.remove('hidden');
+    }
+
+    function getSelectedParts() {
+      return Array.from(document.querySelectorAll('input[name="part"]:checked'));
+    }
+  </script>
+
+</body>
+</html>
